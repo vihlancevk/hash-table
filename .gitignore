@@ -1,2 +1,4 @@
 main.o
+HashTable.o
+List.o
 note
