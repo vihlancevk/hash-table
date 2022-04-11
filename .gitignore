@@ -3,3 +3,4 @@ HashTable.o
 List.o
 Makefile
 note
+res/
