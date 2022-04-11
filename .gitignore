@@ -1,4 +1,5 @@
 main.o
 HashTable.o
 List.o
+Makefile
 note
