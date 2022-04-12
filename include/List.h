@@ -5,7 +5,7 @@
 
 #define DEBUG
 
-typedef int structElemT;
+typedef char* structElemT;
 
 enum ListStatus
 {

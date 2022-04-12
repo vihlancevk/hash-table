@@ -10,7 +10,8 @@ int main()
     HashTableErrorCode hashTableError = HASH_TABLE_NO_ERROR;
 
     hashTableError = HashTableCtor( &hashTable );
-    hashTableError = HashTableDtor( &hashTable );    
+    hashTableError = HashTableInsert( &hashTable, (char*)"Kosty" );   
+    hashTableError = HashTableDtor( &hashTable ); 
 
     return hashTableError;
 }

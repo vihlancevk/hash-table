@@ -82,7 +82,7 @@ ListErrorCode ListCtor(List_t *list, const size_t capacity)
     }
     
     ClearListLogFile();
-    
+
     list->status = LIST_CONSTRUCTED;
     list->isSorted = 1;
     list->capacity = capacity + 1;
@@ -177,7 +177,7 @@ ListErrorCode ListDump(const List_t *list)
             fprintf(logFile, "<br><br>");                                     \
         } while(0)
 
-    FPRINTF_LIST_DATA_(d, elem);
+    FPRINTF_LIST_DATA_(s, elem);
     FPRINTF_LIST_DATA_(d, next);
     FPRINTF_LIST_DATA_(d, prev);
 
@@ -205,7 +205,7 @@ ListErrorCode ListDump(const List_t *list)
             {
                 strcpy(listNode.color, "yellow");
             }
-            fprintf(graphViz, "\t%lu[shape=record, style=\"filled\", fillcolor=%s, label=\"<%lu> address : %lu | <%d> elem : %d | <%d> next : %d | <%d> prev : %d\"];\n",
+            fprintf(graphViz, "\t%lu[shape=record, style=\"filled\", fillcolor=%s, label=\"<%lu> address : %lu | <%s> elem : %s | <%d> next : %d | <%d> prev : %d\"];\n",
                     i, listNode.color, i, i,
                     list->data[i].elem, list->data[i].elem,
                     list->data[i].next, list->data[i].next,
