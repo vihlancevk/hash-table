@@ -5,8 +5,9 @@
 
 #include "HashFunctions.cpp"
 
-const size_t LIST_SIZE          = 4 ;
-const int    HASH_TABLE_NO_ELEM = -1;   
+const size_t LIST_SIZE            = 4 ;
+const int    HASH_TABLE_NO_ELEM   = -1;
+const char  *HASH_TABLE_GRAPH_VIZ = "./res/hashTableGraphviz.gv" ;
 
 #define ASSERT_OK_( hashTable, elem )                       \
     do                                                      \
@@ -28,6 +29,105 @@ HashTableErrorCode HashTableVerificator( struct HashTable_t *hashTable )
     {
         return HASH_TABLE_USE_NOT_CONSTRUCTED;
     }
+
+    return HASH_TABLE_NO_ERROR;
+}
+
+struct HashTableDumpNodeDescription
+{
+    char color[10];
+};
+
+HashTableErrorCode HashTableDump( struct HashTable_t *hashTable )
+{
+    assert( hashTable != nullptr );
+
+    FILE *graphViz = fopen( HASH_TABLE_GRAPH_VIZ, "w" );
+
+    fprintf( graphViz, "digraph HashTable{\n\n" );
+    fprintf( graphViz, "\trankdir=LR;\n\n" );
+    fprintf( graphViz, "\tnode[color=\"red\",fontsize=14];\n\n" );
+
+    for ( size_t i = HASH_TABLE_SIZE; i > 0; i-- )
+    {
+        fprintf( graphViz, "\t\"%zuht\"[shape=record, style=\"filled\", fillcolor=\"pink\", label=\"%zuht\"];\n", i - 1, i - 1 );
+    }
+    fprintf( graphViz, "\n" );
+
+    size_t currentOffset = 0;
+    for ( size_t i = 0; i < HASH_TABLE_SIZE; i++ )
+    {
+        size_t j = 0;
+
+        if ( hashTable->lists[i].status != LIST_CONSTRUCTED )
+        {
+            fprintf( graphViz, "\t\"%zuht\"->%zu;\n", i, 1 + currentOffset );
+            for ( j = 1; j < LIST_SIZE + 1; j++ )
+            {
+                fprintf( graphViz, "\t%lu[shape=record, style=\"filled\", fillcolor=%s, label=\"<%lu> address : %lu | <%s> elem : %s | <%d> next : %d | <%d> prev : %d\"];\n",
+                         j + currentOffset, "white", 0l, 0l,
+                         "(null)", "(null)",
+                         0, 0,
+                         0, 0 );
+            }
+            fprintf( graphViz, "\n" );
+
+            fprintf( graphViz, "\t{\n" );
+            fprintf( graphViz, "\t\tedge[color=black]\n" );
+            for ( j = 1; j < LIST_SIZE; j++ )
+            {
+                fprintf( graphViz, "\t\t%zu ", j + currentOffset );
+                fprintf( graphViz, "-> %zu\n", j + currentOffset + 1 );
+            }
+            fprintf( graphViz, "\t}\n" );
+            fprintf( graphViz, "\n" );
+            currentOffset += j;
+            continue;
+        }
+
+        if ( hashTable->lists[i].size != 0 )
+        {
+            fprintf( graphViz, "\t\"%zuht\"->%zu;\n", i, 1 + currentOffset );
+            HashTableDumpNodeDescription hashTableNode = {};
+            int head = hashTable->lists[i].head;
+            for ( j = 1; j < hashTable->lists[i].capacity; j++ )
+            {
+                if ( hashTable->lists[i].data[j].prev == -1 )
+                {
+                    strcpy( hashTableNode.color, "green" );
+                }
+                else
+                {
+                    strcpy( hashTableNode.color, "yellow" );
+                }
+
+                fprintf( graphViz, "\t%lu[shape=record, style=\"filled\", fillcolor=%s, label=\"<%lu> address : %lu | <%s> elem : %s | <%d> next : %d | <%d> prev : %d\"];\n",
+                         j + currentOffset, hashTableNode.color, j, j,
+                         hashTable->lists[i].data[j].elem, hashTable->lists[i].data[j].elem,
+                         hashTable->lists[i].data[j].next, hashTable->lists[i].data[j].next,
+                         hashTable->lists[i].data[j].prev, hashTable->lists[i].data[j].prev );
+
+                head = hashTable->lists[i].data[head].next;
+            }
+            fprintf( graphViz, "\n" );
+
+            fprintf( graphViz, "\t{\n" );
+            fprintf( graphViz, "\t\tedge[color=black]\n" );
+            for ( j = 1; j < hashTable->lists[i].capacity - 1; j++ )
+            {
+                fprintf( graphViz, "\t\t%zu ", j + currentOffset );
+                fprintf( graphViz, "-> %zu\n", j + currentOffset + 1 );
+            }
+            fprintf( graphViz, "\t}\n" );
+            fprintf( graphViz, "\n" );
+        }
+        currentOffset += j;
+    }
+    fprintf( graphViz, "}\n\n" );
+
+    fclose( graphViz );
+
+    system( "dot -Tpng ./res/hashTableGraphviz.gv -o ./res/hashTableGraphviz.png" );
 
     return HASH_TABLE_NO_ERROR;
 }

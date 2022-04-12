@@ -20,11 +20,11 @@ ListErrorCode listStatus = LIST_NO_ERROR;
         }                                \
     } while(0)
 
-const int LIST_PLACE_FREE = -1;
+const int LIST_PLACE_FREE            = -1;
 const int LIST_RESIZE_UP_COEFFICIENT = 2;
-const int LIST_CMD_MAX_SIZE = 1000;
-const int POISON = -(1000 - 7);
-const void *const ERR_PTR = (void*)666;
+const int LIST_CMD_MAX_SIZE          = 1000;
+const int POISON                     = -(1000 - 7);
+const void *const ERR_PTR  = (void*)666;
 const char *LIST_LOG_FILE  = "./res/listLog.html";
 const char *LIST_GRAPH_VIZ = "./res/graphviz.gv" ;
 

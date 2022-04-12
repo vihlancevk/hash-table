@@ -3,7 +3,7 @@
 
 #include "../include/List.h"
 
-const size_t HASH_TABLE_SIZE = 2 << 8;
+const size_t HASH_TABLE_SIZE = 10;
 
 enum HashTableStatus
 {
@@ -31,6 +31,7 @@ struct HashTable_t
     int (*hashFunction)( const void *elem, size_t size );
 };
 
+HashTableErrorCode HashTableDump( struct HashTable_t *hashTable );
 HashTableErrorCode HashTableCtor( struct HashTable_t *hashTable );
 HashTableErrorCode HashTableDtor( struct HashTable_t *hashTable );
 int                HashTableFind  ( struct HashTable_t *hashTable, const char *elem );
