@@ -3,8 +3,6 @@
 
 #include <stdio.h>
 
-#define DEBUG
-
 typedef char* structElemT;
 
 enum ListStatus
@@ -36,6 +34,7 @@ struct ListNode_t
     structElemT elem;
     int next;
     int prev;
+    size_t n_elems;
 };
 
 struct List_t

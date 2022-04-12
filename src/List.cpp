@@ -5,6 +5,7 @@
 #include "../include/List.h"
 
 #define DEBUG
+#undef  DEBUG
 
 ListErrorCode listStatus = LIST_NO_ERROR;
 
@@ -120,7 +121,7 @@ ListErrorCode ListDtor(List_t *list)
 {
     assert(list != nullptr);
 
-    if (list->status == LIST_DESTRUCTED)
+    if (list->status != LIST_CONSTRUCTED)
     {
         return LIST_DESTRUCTED_ERROR;
     }
