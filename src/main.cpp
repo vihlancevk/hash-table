@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include "../include/HashTable.h"
+#include "../include/FileOperations.h"
+
+const char *INPUT_ONEGIN_FILE  = "./res/inputOnegin.txt" ;
 
 int main()
 {
@@ -10,12 +13,13 @@ int main()
     HashTableErrorCode hashTableError = HASH_TABLE_NO_ERROR;
 
     hashTableError = HashTableCtor( &hashTable );
-    hashTableError = HashTableInsert( &hashTable, (char*)"Kosty"  );
-    hashTableError = HashTableInsert( &hashTable, (char*)"Andrey" );
-    hashTableError = HashTableInsert( &hashTable, (char*)"Vany"   );
-    hashTableError = HashTableInsert( &hashTable, (char*)"Lev"    );
-    hashTableError = HashTableInsert( &hashTable, (char*)"Alik"   );
-    hashTableError = HashTableDump ( &hashTable );
+    
+    char *ptrStr   = nullptr;
+    Line *ptrLines = nullptr;
+    hashTableError = FillHashTable( &hashTable, INPUT_ONEGIN_FILE, ptrStr, ptrLines );
+
+    if ( ptrStr   != nullptr ) { free( ptrStr   ) ; }
+    if ( ptrLines != nullptr ) { free( ptrLines ) ; }
     hashTableError = HashTableDtor( &hashTable );
 
     return hashTableError;

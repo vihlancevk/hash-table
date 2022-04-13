@@ -2,8 +2,10 @@ res/graphviz/
 res/graphviz.gv
 res/hashTableGraphviz.gv
 res/listLog.html
+res/hashTableGraphviz.png
 main.o
 HashTable.o
 List.o
+FileOperations.o
 Makefile
 note

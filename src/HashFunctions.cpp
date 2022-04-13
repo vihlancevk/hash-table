@@ -1,3 +1,5 @@
+
+
 static int HashRot13( const void *elem, size_t size )
 {
     assert(elem != nullptr);

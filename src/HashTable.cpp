@@ -5,7 +5,7 @@
 
 #include "HashFunctions.cpp"
 
-const size_t LIST_SIZE            = 4 ;
+const size_t LIST_SIZE            = 10;
 const int    HASH_TABLE_NO_ELEM   = -1;
 const char  *HASH_TABLE_GRAPH_VIZ = "./res/hashTableGraphviz.gv" ;
 
@@ -212,7 +212,7 @@ HashTableErrorCode HashTableInsert( struct HashTable_t *hashTable, const char *e
         if ( strcmp( hashTable->lists[hashTableIndex].data[j].elem, elem ) == 0 )
         {
             hashTable->lists[hashTableIndex].data[j].n_elems += 1;
-            return HASH_TABLE_LIST_INSERT_ALREDY_EXISTS;
+            return HASH_TABLE_NO_ERROR;
         }
         j = hashTable->lists[hashTableIndex].data[j].next;
     }
@@ -221,5 +221,27 @@ HashTableErrorCode HashTableInsert( struct HashTable_t *hashTable, const char *e
     if ( LIST_INSERT_AT_END_( &hashTable->lists[hashTableIndex], &physNum, (const structElemT)elem ) != LIST_NO_ERROR )
         return HASH_TABLE_LIST_INSERT_ERROR;
 
+    return HASH_TABLE_NO_ERROR;
+}
+
+HashTableErrorCode FillHashTable( struct HashTable_t *hashTable, const char *nameFile, char *ptrStr, Line *ptrLines )
+{
+    assert( hashTable != nullptr );
+    assert( nameFile  != nullptr );
+
+    int   linesCount  = 0;
+    Line *lines       = (Line*)fillStructLine( nameFile, &linesCount, ptrStr, ptrLines );
+    if ( lines == nullptr )
+        return HASH_TABLE_FILL_LINE_ERROR;
+
+    for ( int i = 0; i < linesCount; i++ )
+    {
+        if ( strcmp( lines[i].str, "\0" ) != 0 )
+        {
+            HashTableErrorCode hashTableError = HashTableInsert( hashTable, lines[i].str );
+            if ( hashTableError != HASH_TABLE_NO_ERROR  )
+                return hashTableError;
+        }
+    }
     return HASH_TABLE_NO_ERROR;
 }
