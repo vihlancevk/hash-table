@@ -5,6 +5,7 @@ res/listLog.html
 res/hashTableGraphviz.png
 main.o
 HashTable.o
+HashFunctions.o
 List.o
 FileOperations.o
 Makefile

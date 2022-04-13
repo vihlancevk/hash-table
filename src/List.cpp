@@ -369,7 +369,7 @@ static ListErrorCode ListResizeUp(List_t *list)
     }
     list->data = data;
     list->freePlace = list->size + 1;
-
+    
     size_t i = 0;
     for (i = list->freePlace; i < list->capacity; i++)
     {
@@ -389,7 +389,7 @@ ListErrorCode ListInsertAfter(List_t *list, int *physNum, const structElemT elem
 {
     ASSERT_OK_(list);
 
-    if (list->freePlace == 0)
+    if (list->freePlace == 0 || list->size == list->capacity - 1)
     {
         ListErrorCode listError = ListResizeUp(list);
         if (listError != LIST_NO_ERROR)
@@ -405,9 +405,9 @@ ListErrorCode ListInsertAfter(List_t *list, int *physNum, const structElemT elem
     {
         *physNum = list->freePlace;
     }
+
     int freePlace = list->freePlace;
     list->freePlace = list->data[freePlace].next;
-
     list->data[freePlace].next = list->data[place].next;
     list->data[freePlace].prev = place;
     if (list->size == 0)
@@ -449,7 +449,7 @@ ListErrorCode ListInsertBefore(List_t *list, int *physNum, const structElemT ele
         return LIST_INSERT_BEFORE_UNCORRECT_USE;
     }
 
-    if (list->freePlace == 0)
+    if (list->freePlace == 0  || list->size == list->capacity- 1)
     {
         ListErrorCode listError = ListResizeUp(list);
         if (listError != LIST_NO_ERROR)

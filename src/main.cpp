@@ -1,26 +1,67 @@
 #include <stdio.h>
 #include "../include/HashTable.h"
+#include "../include/HashFunctions.h"
 #include "../include/FileOperations.h"
 
-const char *INPUT_ONEGIN_FILE  = "./res/inputOnegin.txt" ;
+const char *INPUT_ONEGIN_FILE      = "./res/inputOnegin.txt"    ;
+const char *OUTPUT_HASH_TABLE_FILE = "./res/outputHashTable.txt";
 
-int main()
+enum MainErrorCode
 {
-    printf( "It is hash table!\n" );
+    MAIN_NO_ERROR,
+    MAIN_HASH_TABLE_CTOR_ERROR,
+    MAIN_HASH_TABLE_FILL_ERROR,
+    MAIN_OUTPUT_HASH_TABLE_FILE_NOT_OPEN,
+    MAIN_HASH_TABLE_DTOR_ERROR
+};
 
-    struct HashTable_t hashTable = {};
-
+MainErrorCode CheckHashFunction( int (*hashFunction)( const void *, size_t ) )
+{
     HashTableErrorCode hashTableError = HASH_TABLE_NO_ERROR;
 
-    hashTableError = HashTableCtor( &hashTable );
+    struct HashTable_t hashTable = {};
+    hashTableError = HashTableCtor( &hashTable, hashFunction );
+    if ( hashTableError != HASH_TABLE_NO_ERROR )
+        return MAIN_HASH_TABLE_CTOR_ERROR;
     
     char *ptrStr   = nullptr;
     Line *ptrLines = nullptr;
-    hashTableError = FillHashTable( &hashTable, INPUT_ONEGIN_FILE, ptrStr, ptrLines );
+    hashTableError = FillHashTable( &hashTable, INPUT_ONEGIN_FILE, &ptrStr, &ptrLines );
+    if ( hashTableError != HASH_TABLE_NO_ERROR )
+    {
+        free( ptrStr   );
+        free( ptrLines );
+        return MAIN_HASH_TABLE_FILL_ERROR;
+    }
 
-    if ( ptrStr   != nullptr ) { free( ptrStr   ) ; }
-    if ( ptrLines != nullptr ) { free( ptrLines ) ; }
+    FILE *foutput = fopen( OUTPUT_HASH_TABLE_FILE, "w" );
+    if ( foutput == nullptr )
+        return MAIN_OUTPUT_HASH_TABLE_FILE_NOT_OPEN;
+
+    size_t j = 0;
+    for ( size_t i = 1; i <= HASH_TABLE_SIZE; i++ )
+    {
+        j += hashTable.lists[i - 1].size;
+        fprintf( foutput, "%zu  %zu\n", i, hashTable.lists[i - 1].size );
+    }
+    // printf( "%zu\n", j );
+
+    fclose( foutput );
+
+    free( ptrStr   );
+    free( ptrLines );
     hashTableError = HashTableDtor( &hashTable );
+    if ( hashTableError != HASH_TABLE_NO_ERROR )
+        return MAIN_HASH_TABLE_DTOR_ERROR;
 
-    return hashTableError;
+    return MAIN_NO_ERROR;
+}
+
+int main()
+{
+    MainErrorCode mainError = MAIN_NO_ERROR;
+
+    mainError = CheckHashFunction( HashOne );
+
+    return mainError;
 }

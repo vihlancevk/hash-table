@@ -83,14 +83,14 @@ int countNumberLines(char *str, int numberBytesFile)
 
     for (int i = 0; i < numberBytesFile; i++)
     {
-        if ( strchr( SEPARATION_SYMBOLS, str[i] ) != nullptr || (i + 1) == numberBytesFile )
+        if (strchr(SEPARATION_SYMBOLS, str[i]) != nullptr || (i + 1) == numberBytesFile)
         {
             linesCount++;
             str[i] = '\0';
         }
         else
         {
-            str[i] = tolower( str[i] );
+            str[i] = tolower(str[i]);
         }
     }
 
@@ -103,7 +103,7 @@ static void *findNextLine(char *str)
 
     char *ptrStr = str;
 
-    while (*ptrStr != '\0' )
+    while (*ptrStr != '\0')
     {
         ptrStr++;
     }
@@ -163,10 +163,12 @@ static void moveToNextLine(FILE *foutput)
 //! @return Указатель на заполненный массив структур Line.
 //--------------------------------------------------------------------------------
 
-void *fillStructLine(const char* nameFile, int *linesCount, char *ptrStr, Line *ptrLines)
+void *fillStructLine(const char* nameFile, int *linesCount, char **ptrStr, Line **ptrLines)
 {
     assert(nameFile != nullptr);
     assert(linesCount != nullptr);
+    assert(ptrStr != nullptr);
+    assert(ptrLines != nullptr);
 
     FILE *finput = fopen(nameFile, "r");
     assert(finput != nullptr);
@@ -195,8 +197,8 @@ void *fillStructLine(const char* nameFile, int *linesCount, char *ptrStr, Line *
 
     splitToLines(lines, *linesCount, str);
 
-    ptrStr   = str;
-    ptrLines = lines;
+    *ptrStr   = str;
+    *ptrLines = lines;
     fclose(finput);
 
     return lines;
@@ -220,7 +222,7 @@ void writeFile(Line *lines, int linesCount, FILE *foutput)
 
     for (int i = 0; i < linesCount; i++)
     {
-        if ( strcmp( lines[i].str, "\0" ) != 0 )
+        if (strcmp(lines[i].str, "\0") != 0)
         {
             fputs(lines[i].str, foutput);
             moveToNextLine(foutput);

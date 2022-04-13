@@ -3,8 +3,6 @@
 #include <assert.h>
 #include "../include/HashTable.h"
 
-#include "HashFunctions.cpp"
-
 const size_t LIST_SIZE            = 10;
 const int    HASH_TABLE_NO_ELEM   = -1;
 const char  *HASH_TABLE_GRAPH_VIZ = "./res/hashTableGraphviz.gv" ;
@@ -132,7 +130,7 @@ HashTableErrorCode HashTableDump( struct HashTable_t *hashTable )
     return HASH_TABLE_NO_ERROR;
 }
 
-HashTableErrorCode HashTableCtor( struct HashTable_t *hashTable )
+HashTableErrorCode HashTableCtor( struct HashTable_t *hashTable, int (*hashFunction)( const void *, size_t ) )
 {
     assert( hashTable != nullptr );
 
@@ -142,7 +140,7 @@ HashTableErrorCode HashTableCtor( struct HashTable_t *hashTable )
     }
 
     hashTable->lists           = (struct List_t*)calloc( HASH_TABLE_SIZE, sizeof( struct List_t ) );
-    hashTable->hashFunction    = HashRot13;
+    hashTable->hashFunction    = hashFunction;
     hashTable->hashTableStatus = HASH_TABLE_CONSTRUCTED;
 
     return HASH_TABLE_NO_ERROR;
@@ -167,7 +165,7 @@ HashTableErrorCode HashTableDtor( struct HashTable_t *hashTable )
             if ( listError != LIST_NO_ERROR )
             {
                 free( hashTable->lists );
-                hashTable->hashFunction    = HashRot13;
+                hashTable->hashFunction    = nullptr;
                 hashTable->hashTableStatus = HASH_TABLE_DESTRUCTED;
                 return HASH_TABLE_LIST_DTOR_ERROR;           
             }
@@ -224,10 +222,12 @@ HashTableErrorCode HashTableInsert( struct HashTable_t *hashTable, const char *e
     return HASH_TABLE_NO_ERROR;
 }
 
-HashTableErrorCode FillHashTable( struct HashTable_t *hashTable, const char *nameFile, char *ptrStr, Line *ptrLines )
+HashTableErrorCode FillHashTable( struct HashTable_t *hashTable, const char *nameFile, char **ptrStr, Line **ptrLines )
 {
     assert( hashTable != nullptr );
     assert( nameFile  != nullptr );
+    assert( ptrStr    != nullptr );
+    assert( ptrLines  != nullptr );
 
     int   linesCount  = 0;
     Line *lines       = (Line*)fillStructLine( nameFile, &linesCount, ptrStr, ptrLines );
