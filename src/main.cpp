@@ -15,7 +15,7 @@ enum MainErrorCode
     MAIN_HASH_TABLE_DTOR_ERROR
 };
 
-MainErrorCode CheckHashFunction( int (*hashFunction)( const void *, size_t ) )
+MainErrorCode CheckHashFunction( const char *hashFunctionName, int (*hashFunction)( const void *, size_t ) )
 {
     HashTableErrorCode hashTableError = HASH_TABLE_NO_ERROR;
 
@@ -38,13 +38,15 @@ MainErrorCode CheckHashFunction( int (*hashFunction)( const void *, size_t ) )
     if ( foutput == nullptr )
         return MAIN_OUTPUT_HASH_TABLE_FILE_NOT_OPEN;
 
+    fprintf( foutput, "%s\n", hashFunctionName );
+
     size_t j = 0;
-    for ( size_t i = 1; i <= HASH_TABLE_SIZE; i++ )
+    for ( size_t i = 0; i < HASH_TABLE_SIZE; i++ )
     {
-        j += hashTable.lists[i - 1].size;
-        fprintf( foutput, "%zu  %zu\n", i, hashTable.lists[i - 1].size );
+        j += hashTable.lists[i].size;
+        fprintf( foutput, "%zu %zu ", i, hashTable.lists[i].size );
     }
-    // printf( "%zu\n", j );
+    printf( "%zu\n", j );
 
     fclose( foutput );
 
@@ -61,7 +63,7 @@ int main()
 {
     MainErrorCode mainError = MAIN_NO_ERROR;
 
-    mainError = CheckHashFunction( HashOne );
+    mainError = CheckHashFunction( "HashRot13", HashRot13 );
 
     return mainError;
 }

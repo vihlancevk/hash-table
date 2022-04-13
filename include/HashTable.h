@@ -4,7 +4,7 @@
 #include "../include/List.h"
 #include "../include/FileOperations.h"
 
-const size_t HASH_TABLE_SIZE = 500;
+const size_t HASH_TABLE_SIZE = 700;
 
 enum HashTableStatus
 {
