@@ -8,5 +8,3 @@ HashTable.o
 HashFunctions.o
 List.o
 FileOperations.o
-Makefile
-note
