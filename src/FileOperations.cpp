@@ -118,11 +118,17 @@ void splitToLines(Line *lines, int linesCount, char *str)
     {
         lines[i].str = ptrStr;
         lines[i].sizeStr = (int)strlen(lines[i].str);
-        while (*ptrStr != '\0')
-        {
-            ptrStr++;
-        }
-        ptrStr++;
+        __asm__ ( "next:\n\t"
+                  "cmpb $0x0, (%%rsi)\n\t"
+                  "je stop\n\t"
+                  "incq %%rsi\n\t"
+                  "jmp next\n\t"
+                  "stop:\n\t"
+                  "incq %%rsi\n\t"
+                  :"=S"( ptrStr )
+                  :"0" ( ptrStr )
+                  :"%rax"
+                );
     }
 }
 
