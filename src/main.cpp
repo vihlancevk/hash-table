@@ -59,8 +59,14 @@ MainErrorCode CheckHashFunction( const char *hashFunctionName, int (*hashFunctio
     return MAIN_NO_ERROR;
 }
 
+// #define test( num )        \
+//     printf( " " );         \
+//     printf( num"test\n" ); 
+
 int main()
 {
+    // test( "1" )
+
     MainErrorCode mainError = MAIN_NO_ERROR;
 
     mainError = CheckHashFunction( "HashRot13", HashRot13 );

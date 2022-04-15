@@ -7,29 +7,24 @@ const size_t LIST_SIZE            = 10;
 const int    HASH_TABLE_NO_ELEM   = -1;
 const char  *HASH_TABLE_GRAPH_VIZ = "./res/hashTableGraphviz.gv" ;
 
-#define ASSERT_OK_( hashTable, elem )                       \
-    do                                                      \
-    {                                                       \
-        assert( hashTable != nullptr );                     \
-        assert( elem      != nullptr );                     \
-        hashTableError = HashTableVerificator( hashTable ); \
-        if ( hashTableError != HASH_TABLE_NO_ERROR )        \
-        {                                                   \
-            return hashTableError;                          \
-        }                                                   \
-    } while( 0 )
-
-HashTableErrorCode HashTableVerificator( struct HashTable_t *hashTable )
-{
-    assert( hashTable != nullptr );
-
-    if ( hashTable->hashTableStatus != HASH_TABLE_CONSTRUCTED )
-    {
-        return HASH_TABLE_USE_NOT_CONSTRUCTED;
-    }
-
-    return HASH_TABLE_NO_ERROR;
-}
+#define ASSERT_OK_( hashTable, elem, nameFun )                                \
+    do                                                                        \
+    {                                                                         \
+        assert( hashTable != nullptr );                                       \
+        assert( elem      != nullptr );                                       \
+        HashTableErrorCode hashTableError = HASH_TABLE_NO_ERROR;              \
+        __asm__ ( "# movl $0, %%eax\n\t"                                      \
+                  "cmpl $1, %%ebx\n\t"                                        \
+                  "je "                                                       \
+                  nameFun"_hash_table_no_error_\n\t"                          \
+                  "movl $7, %%eax\n\t"                                        \
+                  nameFun"_hash_table_no_error_:\n\t"                         \
+                  :"=a"( hashTableError )                                     \
+                  :"0" ( hashTableError ), "b" ( hashTable->hashTableStatus ) \
+                );                                                            \
+        if ( hashTableError != HASH_TABLE_NO_ERROR )                          \
+            return hashTableError;                                            \
+    } while( 0 );
 
 struct HashTableDumpNodeDescription
 {
@@ -180,8 +175,7 @@ HashTableErrorCode HashTableDtor( struct HashTable_t *hashTable )
 
 int HashTableFind( struct HashTable_t *hashTable, const char *elem )
 {
-    HashTableErrorCode hashTableError = HASH_TABLE_NO_ERROR;
-    ASSERT_OK_( hashTable, elem );
+    ASSERT_OK_( hashTable, elem, "find" );
 
     int hashTableIndex = hashTable->hashFunction( elem, strlen( elem ) );
     if ( hashTable->lists[hashTableIndex].status == LIST_NOT_CONSTRUCTED )
@@ -194,8 +188,7 @@ int HashTableFind( struct HashTable_t *hashTable, const char *elem )
 
 HashTableErrorCode HashTableInsert( struct HashTable_t *hashTable, const char *elem )
 {
-    HashTableErrorCode hashTableError = HASH_TABLE_NO_ERROR;
-    ASSERT_OK_( hashTable, elem );
+    ASSERT_OK_( hashTable, elem, "insert" );
 
     int hashTableIndex = HashTableFind( hashTable, elem );
     if ( hashTableIndex == HASH_TABLE_NO_ELEM )
