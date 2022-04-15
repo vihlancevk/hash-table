@@ -53,11 +53,15 @@ static int IsListCycle(const List_t *list)
 ListErrorCode GetListError(const List_t *list)
 {
     assert(list != nullptr);
-
-    if (list->status != LIST_CONSTRUCTED)
-    {
-        return LIST_USE_NOT_CONSTRUCTED;
-    }
+    
+    __asm__ ( "cmpl $1, %%eax\n\t"
+              "je list_no_error\n\t"
+              "movl $6, -4(%%rbp)\n\t"
+              "ret\n\t"
+              "list_no_error:\n\t"
+              :
+              :"a" ( list->status )
+            );
 
     if (IsListCycle(list))
     {

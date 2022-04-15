@@ -8,9 +8,4 @@ HashTable.o
 HashFunctions.o
 List.o
 FileOperations.o
-optimizations.
-1callgrind.out.2955
-2callgrind.out.15995
-3callgrind.out.18932
-4callgrind.out.19545
-5callgrind.out.22740
+optimizations/

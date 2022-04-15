@@ -12,14 +12,14 @@ const char  *HASH_TABLE_GRAPH_VIZ = "./res/hashTableGraphviz.gv" ;
     {                                                                         \
         assert( hashTable != nullptr );                                       \
         assert( elem      != nullptr );                                       \
-        __asm__ ( "cmpl $1, %%ebx\n\t"                                        \
+        __asm__ ( "cmpl $1, %%eax\n\t"                                        \
                   "je "                                                       \
-                  nameFun"_hash_table_no_error_\n\t"                          \
+                  nameFun"_hash_table_no_error\n\t"                          \
                   "movl $7, -4(%%rbp)\n\t"                                    \
                   "ret\n\t"                                                   \
-                  nameFun"_hash_table_no_error_:\n\t"                         \
+                  nameFun"_hash_table_no_error:\n\t"                         \
                   :                                                           \
-                  :"b" ( hashTable->hashTableStatus )                         \
+                  :"a" ( hashTable->hashTableStatus )                         \
                 );                                                            \
     } while( 0 );
 
