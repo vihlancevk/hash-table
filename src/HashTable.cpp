@@ -12,18 +12,15 @@ const char  *HASH_TABLE_GRAPH_VIZ = "./res/hashTableGraphviz.gv" ;
     {                                                                         \
         assert( hashTable != nullptr );                                       \
         assert( elem      != nullptr );                                       \
-        HashTableErrorCode hashTableError = HASH_TABLE_NO_ERROR;              \
-        __asm__ ( "# movl $0, %%eax\n\t"                                      \
-                  "cmpl $1, %%ebx\n\t"                                        \
+        __asm__ ( "cmpl $1, %%ebx\n\t"                                        \
                   "je "                                                       \
                   nameFun"_hash_table_no_error_\n\t"                          \
-                  "movl $7, %%eax\n\t"                                        \
+                  "movl $7, -4(%%rbp)\n\t"                                    \
+                  "ret\n\t"                                                   \
                   nameFun"_hash_table_no_error_:\n\t"                         \
-                  :"=a"( hashTableError )                                     \
-                  :"0" ( hashTableError ), "b" ( hashTable->hashTableStatus ) \
+                  :                                                           \
+                  :"b" ( hashTable->hashTableStatus )                         \
                 );                                                            \
-        if ( hashTableError != HASH_TABLE_NO_ERROR )                          \
-            return hashTableError;                                            \
     } while( 0 );
 
 struct HashTableDumpNodeDescription
