@@ -3,7 +3,6 @@
 
 const char *SEPARATION_SYMBOLS = " .,!?;:-'`\"\n\t";
 
-static void *findNextLine(char *str);
 static void  moveToNextLine(FILE *foutput);
 
 //================================================================================
@@ -97,20 +96,6 @@ int countNumberLines(char *str, int numberBytesFile)
     return linesCount;
 }
 
-static void *findNextLine(char *str)
-{
-    assert(str != nullptr);
-
-    char *ptrStr = str;
-
-    while (*ptrStr != '\0')
-    {
-        ptrStr++;
-    }
-
-    return ptrStr + 1;
-}
-
 //================================================================================
 //! @brief Функция разделения текста на строки.
 //!
@@ -128,13 +113,16 @@ void splitToLines(Line *lines, int linesCount, char *str)
     assert(str != nullptr);
 
     char *ptrStr = str;
-    ptrStr = (char*)findNextLine(ptrStr);
 
     for (int i = 0; i < linesCount; i++)
     {
         lines[i].str = ptrStr;
         lines[i].sizeStr = (int)strlen(lines[i].str);
-        ptrStr = (char*)findNextLine(ptrStr);
+        while (*ptrStr != '\0')
+        {
+            ptrStr++;
+        }
+        ptrStr++;
     }
 }
 
