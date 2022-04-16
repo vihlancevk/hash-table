@@ -78,11 +78,11 @@ int countNumberLines(char *str, int numberBytesFile)
 {
     assert(str != nullptr);
 
-    int linesCount = 0;
-
-    for (int i = 0; i < numberBytesFile; i++)
+    int linesCount = 1;
+    int i = 0;
+    for ( ; i < numberBytesFile - 1; i++)
     {
-        if (strchr(SEPARATION_SYMBOLS, str[i]) != nullptr || (i + 1) == numberBytesFile)
+        if (strchr(SEPARATION_SYMBOLS, str[i]) != nullptr)
         {
             linesCount++;
             str[i] = '\0';
@@ -92,6 +92,7 @@ int countNumberLines(char *str, int numberBytesFile)
             str[i] = tolower(str[i]);
         }
     }
+    str[i] = '\0';
 
     return linesCount;
 }
