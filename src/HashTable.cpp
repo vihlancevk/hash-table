@@ -122,7 +122,7 @@ HashTableErrorCode HashTableDump( struct HashTable_t *hashTable )
     return HASH_TABLE_NO_ERROR;
 }
 
-HashTableErrorCode HashTableCtor( struct HashTable_t *hashTable, int (*hashFunction)( const void *, size_t ) )
+HashTableErrorCode HashTableCtor( struct HashTable_t *hashTable, unsigned int (*hashFunction)( const void *, size_t ) )
 {
     assert( hashTable != nullptr );
 

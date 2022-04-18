@@ -8,4 +8,5 @@ HashTable.o
 HashFunctions.o
 List.o
 FileOperations.o
+HashRot13.o
 optimizations/

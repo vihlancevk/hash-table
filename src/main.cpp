@@ -15,7 +15,7 @@ enum MainErrorCode
     MAIN_HASH_TABLE_DTOR_ERROR
 };
 
-MainErrorCode CheckHashFunction( const char *hashFunctionName, int (*hashFunction)( const void *, size_t ) )
+MainErrorCode CheckHashFunction( const char *hashFunctionName, unsigned int (*hashFunction)( const void *, size_t ) )
 {
     HashTableErrorCode hashTableError = HASH_TABLE_NO_ERROR;
 
