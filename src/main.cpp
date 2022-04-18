@@ -61,8 +61,6 @@ MainErrorCode CheckHashFunction( const char *hashFunctionName, unsigned int (*ha
 
 int main()
 {
-    // test( "1" )
-
     MainErrorCode mainError = MAIN_NO_ERROR;
 
     mainError = CheckHashFunction( "HashRot13", HashRot13 );

@@ -7,8 +7,8 @@ global HashRot13
 
 HashRot13:
 
-mov eax, 0      ; int hash = 0
-mov rbx, 0      ; size_t i = 0
+xor eax, eax ; int hash = 0
+xor rbx, rbx ; size_t i = 0
 
 .for:
     xor edx, edx
@@ -16,24 +16,23 @@ mov rbx, 0      ; size_t i = 0
     cmp rbx, rsi
     jae .return
 
-    mov dl, byte [rdi + rbx] ; int dl = (int)(char*)elem[i]
-    add eax, edx             ; hash  += dl
+    mov dl, byte [rdi + rbx] ; int edx = (int)(char*)elem[i]
+    add eax, edx             ; hash  += edx
     
-    mov ecx, eax        ; (hash << 13)
-    shl ecx, 13         ;
+    mov ecx, eax ; (hash << 13)
+    shl ecx, 13  ;
     
-    mov edx, eax        ; (hash << 19)
-    shr edx, 19         ;
+    mov edx, eax ; (hash << 19)
+    shr edx, 19  ;
     
-    or ecx, edx         ; (hash << 13) | (hash << 19)
+    or ecx, edx ; (hash << 13) | (hash << 19)
     
-    sub eax, ecx        ; hash -= (hash << 13) | (hash << 19)
+    sub eax, ecx ; hash -= (hash << 13) | (hash << 19)
     
     inc rbx
     jmp .for
 
 .return:
-    xor edx, edx
     mov ecx, 700
     div ecx
     
