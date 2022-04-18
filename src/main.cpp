@@ -59,10 +59,6 @@ MainErrorCode CheckHashFunction( const char *hashFunctionName, unsigned int (*ha
     return MAIN_NO_ERROR;
 }
 
-// #define test( num )        \
-//     printf( " " );         \
-//     printf( num"test\n" ); 
-
 int main()
 {
     // test( "1" )
