@@ -11,3 +11,4 @@ FileOperations.o
 HashRot13.o
 optimizations/
 note.txt
+hashTable
