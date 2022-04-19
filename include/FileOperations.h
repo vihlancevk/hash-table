@@ -8,8 +8,8 @@
 
 /// Описание строки текста.
 struct Line {
-    char *str;  ///< Строка текста.
-    int sizeStr;///< Размер строки.
+    const char *str; ///< Строка текста.
+    int sizeStr;     ///< Размер строки.
 };
 
 int getFileSize(FILE *finput);

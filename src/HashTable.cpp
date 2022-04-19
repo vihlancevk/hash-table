@@ -11,7 +11,7 @@ const char  *HASH_TABLE_GRAPH_VIZ = "./res/hashTableGraphviz.gv" ;
     do                                                                        \
     {                                                                         \
         assert( hashTable != nullptr );                                       \
-        assert( elem      != nullptr );                                       \
+        assert( lines     != nullptr );                                       \
         __asm__ ( "cmpl $1, %%eax\n\t"                                        \
                   "je "                                                       \
                   nameFun"_hash_table_no_error\n\t"                          \
@@ -170,11 +170,11 @@ HashTableErrorCode HashTableDtor( struct HashTable_t *hashTable )
     return HASH_TABLE_NO_ERROR;
 }
 
-int HashTableFind( struct HashTable_t *hashTable, const char *elem )
+int HashTableFind( struct HashTable_t *hashTable, struct Line *lines )
 {
     ASSERT_OK_( hashTable, elem, "find" );
 
-    int hashTableIndex = hashTable->hashFunction( elem, strlen( elem ) );
+    int hashTableIndex = hashTable->hashFunction( lines->str, lines->sizeStr );
     if ( hashTable->lists[hashTableIndex].status == LIST_NOT_CONSTRUCTED )
     {
         hashTableIndex = HASH_TABLE_NO_ELEM;
@@ -183,21 +183,21 @@ int HashTableFind( struct HashTable_t *hashTable, const char *elem )
     return hashTableIndex;
 }
 
-HashTableErrorCode HashTableInsert( struct HashTable_t *hashTable, const char *elem )
+HashTableErrorCode HashTableInsert( struct HashTable_t *hashTable, struct Line *lines )
 {
     ASSERT_OK_( hashTable, elem, "insert" );
 
-    int hashTableIndex = HashTableFind( hashTable, elem );
+    int hashTableIndex = HashTableFind( hashTable, lines );
     if ( hashTableIndex == HASH_TABLE_NO_ELEM )
     {
-        hashTableIndex = hashTable->hashFunction( elem, strlen( elem ) );
+        hashTableIndex = hashTable->hashFunction( lines->str, lines->sizeStr );
         if ( ListCtor( &hashTable->lists[hashTableIndex], LIST_SIZE ) != LIST_NO_ERROR )
             return HASH_TABLE_LIST_CTOR_ERROR;
     }
     
     for ( int i = 0, j = hashTable->lists[hashTableIndex].head; i < hashTable->lists[hashTableIndex].size; i++ )
     {
-        if ( strcmp( hashTable->lists[hashTableIndex].data[j].elem, elem ) == 0 )
+        if ( strcmp( hashTable->lists[hashTableIndex].data[j].elem, lines->str ) == 0 )
         {
             hashTable->lists[hashTableIndex].data[j].n_elems += 1;
             return HASH_TABLE_NO_ERROR;
@@ -206,7 +206,7 @@ HashTableErrorCode HashTableInsert( struct HashTable_t *hashTable, const char *e
     }
 
     int physNum = 0;
-    if ( LIST_INSERT_AT_END_( &hashTable->lists[hashTableIndex], &physNum, (const structElemT)elem ) != LIST_NO_ERROR )
+    if ( LIST_INSERT_AT_END_( &hashTable->lists[hashTableIndex], &physNum, (const structElemT)lines->str ) != LIST_NO_ERROR )
         return HASH_TABLE_LIST_INSERT_ERROR;
 
     return HASH_TABLE_NO_ERROR;
@@ -219,8 +219,8 @@ HashTableErrorCode FillHashTable( struct HashTable_t *hashTable, const char *nam
     assert( ptrStr    != nullptr );
     assert( ptrLines  != nullptr );
 
-    int   linesCount  = 0;
-    Line *lines       = (Line*)fillStructLine( nameFile, &linesCount, ptrStr, ptrLines );
+    int   linesCount   = 0;
+    struct Line *lines = (Line*)fillStructLine( nameFile, &linesCount, ptrStr, ptrLines );
     if ( lines == nullptr )
         return HASH_TABLE_FILL_LINE_ERROR;
 
@@ -228,7 +228,7 @@ HashTableErrorCode FillHashTable( struct HashTable_t *hashTable, const char *nam
     {
         if ( strcmp( lines[i].str, "\0" ) != 0 )
         {
-            HashTableErrorCode hashTableError = HashTableInsert( hashTable, lines[i].str );
+            HashTableErrorCode hashTableError = HashTableInsert( hashTable, &lines[i] );
             if ( hashTableError != HASH_TABLE_NO_ERROR  )
                 return hashTableError;
         }

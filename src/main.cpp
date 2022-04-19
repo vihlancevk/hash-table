@@ -24,8 +24,8 @@ MainErrorCode CheckHashFunction( const char *hashFunctionName, unsigned int (*ha
     if ( hashTableError != HASH_TABLE_NO_ERROR )
         return MAIN_HASH_TABLE_CTOR_ERROR;
     
-    char *ptrStr   = nullptr;
-    Line *ptrLines = nullptr;
+    char *ptrStr          = nullptr;
+    struct Line *ptrLines = nullptr;
     hashTableError = FillHashTable( &hashTable, INPUT_ONEGIN_FILE, &ptrStr, &ptrLines );
     if ( hashTableError != HASH_TABLE_NO_ERROR )
     {
