@@ -15,14 +15,14 @@
 ![](https://github.com/vihlancevk/hash-table/blob/main/res/hashTableImages/(4)HashSumSymbol.png)
 ### HashDed
 Хеш-функция, которая работает по следующему алгоритму
-```shale
+```
 hash~0~ = str[0]
 hash~i+1~ = (hash~i~ rol 1) ^ str[i+1]
 ```
 ![](https://github.com/vihlancevk/hash-table/blob/main/res/hashTableImages/(5)HashDed.png)
 ### HashRot13
 Хеш-функция, которая работает по следующему алгоритму
-```shale
+```
 hash = 0
 hash += str[i]
 hash -= (hash << 13) | (hash >> 19)
