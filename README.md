@@ -16,14 +16,14 @@
 ### HashDed
 Хеш-функция, которая работает по следующему алгоритму
 ```
-hash~0~ = str[0]
-hash~i+1~ = (hash~i~ rol 1) ^ str[i+1]
+h0   = str[0]
+hi+1 = (hi rol 1) ^ str[i+1]
 ```
 ![](https://github.com/vihlancevk/hash-table/blob/main/res/hashTableImages/(5)HashDed.png)
 ### HashRot13
 Хеш-функция, которая работает по следующему алгоритму
 ```
-hash = 0
+hash  = 0
 hash += str[i]
 hash -= (hash << 13) | (hash >> 19)
 ```
