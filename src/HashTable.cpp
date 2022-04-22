@@ -1,11 +1,15 @@
+// ToDo:
+// 1) strcmp через интринсики
+
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 #include "../include/HashTable.h"
 
-const size_t LIST_SIZE            = 10;
-const int    HASH_TABLE_NO_ELEM   = -1;
-const char  *HASH_TABLE_GRAPH_VIZ = "./res/hashTableGraphviz.gv" ;
+static const size_t  LIST_SIZE                  = 10;
+static const ssize_t IS_ELEM_IN_HASH_TABLE      = -1;
+static const ssize_t IS_NOT_ELEM_IN_HASH_TABLE  =  1;
+static const char    *HASH_TABLE_GRAPH_VIZ      = "./res/hashTableGraphviz.gv" ;
 
 #define ASSERT_OK_( hashTable, elem, nameFun )                                \
     do                                                                        \
@@ -14,10 +18,10 @@ const char  *HASH_TABLE_GRAPH_VIZ = "./res/hashTableGraphviz.gv" ;
         assert( lines     != nullptr );                                       \
         __asm__ ( "cmpl $1, %%eax\n\t"                                        \
                   "je "                                                       \
-                  nameFun"_hash_table_no_error\n\t"                          \
+                  nameFun"_hash_table_no_error\n\t"                           \
                   "movl $7, -4(%%rbp)\n\t"                                    \
                   "ret\n\t"                                                   \
-                  nameFun"_hash_table_no_error:\n\t"                         \
+                  nameFun"_hash_table_no_error:\n\t"                          \
                   :                                                           \
                   :"a" ( hashTable->hashTableStatus )                         \
                 );                                                            \
@@ -170,14 +174,15 @@ HashTableErrorCode HashTableDtor( struct HashTable_t *hashTable )
     return HASH_TABLE_NO_ERROR;
 }
 
-int HashTableFind( struct HashTable_t *hashTable, struct Line *lines )
+int HashTableFind( struct HashTable_t *hashTable, struct Line *lines, ssize_t *isElemInHashTable )
 {
+    assert( isElemInHashTable != nullptr );
     ASSERT_OK_( hashTable, elem, "find" );
 
     int hashTableIndex = hashTable->hashFunction( lines->str, lines->sizeStr );
     if ( hashTable->lists[hashTableIndex].status == LIST_NOT_CONSTRUCTED )
     {
-        hashTableIndex = HASH_TABLE_NO_ELEM;
+        *isElemInHashTable = IS_NOT_ELEM_IN_HASH_TABLE;
     }
 
     return hashTableIndex;
@@ -187,19 +192,19 @@ HashTableErrorCode HashTableInsert( struct HashTable_t *hashTable, struct Line *
 {
     ASSERT_OK_( hashTable, elem, "insert" );
 
-    int hashTableIndex = HashTableFind( hashTable, lines );
-    if ( hashTableIndex == HASH_TABLE_NO_ELEM )
+    ssize_t isElemInHashTable = IS_ELEM_IN_HASH_TABLE;
+    size_t  hashTableIndex    = HashTableFind( hashTable, lines, &isElemInHashTable );
+    if ( isElemInHashTable == IS_NOT_ELEM_IN_HASH_TABLE )
     {
-        hashTableIndex = hashTable->hashFunction( lines->str, lines->sizeStr );
         if ( ListCtor( &hashTable->lists[hashTableIndex], LIST_SIZE ) != LIST_NO_ERROR )
             return HASH_TABLE_LIST_CTOR_ERROR;
     }
-    
-    for ( int i = 0, j = hashTable->lists[hashTableIndex].head; i < hashTable->lists[hashTableIndex].size; i++ )
+
+    for ( size_t i = 0, j = hashTable->lists[hashTableIndex].head; i < hashTable->lists[hashTableIndex].size; i++ )
     {
         if ( strcmp( hashTable->lists[hashTableIndex].data[j].elem, lines->str ) == 0 )
         {
-            hashTable->lists[hashTableIndex].data[j].n_elems += 1;
+            ++( hashTable->lists[hashTableIndex].data[j].n_elems );
             return HASH_TABLE_NO_ERROR;
         }
         j = hashTable->lists[hashTableIndex].data[j].next;
@@ -219,12 +224,12 @@ HashTableErrorCode FillHashTable( struct HashTable_t *hashTable, const char *nam
     assert( ptrStr    != nullptr );
     assert( ptrLines  != nullptr );
 
-    int   linesCount   = 0;
+    size_t linesCount  = 0;
     struct Line *lines = (Line*)fillStructLine( nameFile, &linesCount, ptrStr, ptrLines );
     if ( lines == nullptr )
         return HASH_TABLE_FILL_LINE_ERROR;
 
-    for ( int i = 0; i < linesCount; i++ )
+    for ( size_t i = 0; i < linesCount; i++ )
     {
         if ( strcmp( lines[i].str, "\0" ) != 0 )
         {
@@ -233,5 +238,6 @@ HashTableErrorCode FillHashTable( struct HashTable_t *hashTable, const char *nam
                 return hashTableError;
         }
     }
+
     return HASH_TABLE_NO_ERROR;
 }

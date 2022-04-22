@@ -1,3 +1,6 @@
+// ToDo:
+// 1) truncate - очистка файла
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -95,7 +98,7 @@ ListErrorCode ListCtor(List_t *list, const size_t capacity)
         return LIST_DATA_CALLOC_ERROR;
     }
 
-    size_t  i = 0;
+    size_t i = 0;
     for (i = 1; i < list->capacity - 1; i++)
     {
         list->data[i].next = i + 1;
@@ -126,10 +129,10 @@ ListErrorCode ListDtor(List_t *list)
         return LIST_DESTRUCTED_ERROR;
     }
 
-    list->status = LIST_DESTRUCTED;
+    list->status  = LIST_DESTRUCTED;
     list->isSorted = POISON;
     list->capacity = POISON;
-    list->size = POISON;
+    list->size     = POISON;
     free(list->data);
     list->data = (ListNode_t*)ERR_PTR;
     list->head = POISON;

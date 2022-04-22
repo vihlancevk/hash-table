@@ -4,7 +4,7 @@
 #include "../include/List.h"
 #include "../include/FileOperations.h"
 
-const size_t HASH_TABLE_SIZE = 700;
+const size_t HASH_TABLE_SIZE = 2000;
 
 enum HashTableStatus
 {
@@ -35,7 +35,7 @@ struct HashTable_t
 HashTableErrorCode HashTableDump( struct HashTable_t *hashTable );
 HashTableErrorCode HashTableCtor( struct HashTable_t *hashTable, unsigned int (*hashFunction)( const void *, size_t ) );
 HashTableErrorCode HashTableDtor( struct HashTable_t *hashTable );
-int                HashTableFind  ( struct HashTable_t *hashTable, struct Line *lines );
+int                HashTableFind  ( struct HashTable_t *hashTable, struct Line *lines, ssize_t *isElemInHashTable );
 HashTableErrorCode HashTableInsert( struct HashTable_t *hashTable, struct Line *lines );
 HashTableErrorCode FillHashTable( struct HashTable_t *hashTable, const char *nameFile, char **ptrStr, Line **ptrLines );
 

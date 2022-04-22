@@ -1,9 +1,13 @@
+// ToDo:
+// 1) возвращение кода ошибки
+// 2) <errno.h> - прочитать про обработку ошибок
+
 #include <ctype.h>
 #include "../include/FileOperations.h"
 
-const char *SEPARATION_SYMBOLS = " .,!?;:-'`\"\n\t";
+const char *SEPARATION_SYMBOLS = " .,!?;:-'`()<>{}[]/|&*#%$~_\"\n\t";
 
-static void  moveToNextLine(FILE *foutput);
+static void  moveToNextLine( FILE *foutput );
 
 //================================================================================
 //! @brief Функция подсчёта размера файла в байтах.
@@ -16,26 +20,26 @@ static void  moveToNextLine(FILE *foutput);
 //! @return Размер файла в байтах.
 //--------------------------------------------------------------------------------
 
-int getFileSize(FILE *finput)
+ssize_t getFileSize( FILE *finput )
 {
-    assert(finput != nullptr);
+    assert( finput != nullptr );
 
-    if (fseek(finput, 0, SEEK_END))
+    if ( fseek( finput, 0, SEEK_END ) )
     {
-        printf("Error fseek\n");
+        fprintf( stderr, "Error fseek!\n" );
         return -1;
     }
 
-    long numberBytesFile = ftell(finput);
-    if (numberBytesFile == -1L)
+    ssize_t numberBytesFile = ftell(finput);
+    if ( numberBytesFile == -1L )
     {
-        printf("Error ftell\n");
+        fprintf( stderr, "Error ftell!\n" );
         return -1;
     }
 
-    rewind(finput);
+    rewind( finput );
 
-    return (int)numberBytesFile;
+    return numberBytesFile;
 }
 
 //================================================================================
@@ -51,15 +55,15 @@ int getFileSize(FILE *finput)
 //! @return Указатель на буфер.
 //--------------------------------------------------------------------------------
 
-void *readFile(FILE *finput, char *str, int numberBytesFile)
+void *readFile( FILE *finput, char *str, ssize_t numberBytesFile )
 {
-    assert(finput != nullptr);
-    assert(str != nullptr);
-    assert(numberBytesFile > 0);
+    assert( finput != nullptr );
+    assert( str    != nullptr );
+    assert( numberBytesFile > 0 );
 
-    if (((int)fread(str, sizeof(char), numberBytesFile, finput) != numberBytesFile) && !feof(finput))
+    if ( ( fread( str, sizeof(char), numberBytesFile, finput) != numberBytesFile ) && !feof( finput ) )
     {
-        printf("Error fread\n");
+        fprintf( stderr, "Error fread!\n" );
         return nullptr;
     }
 
@@ -74,25 +78,27 @@ void *readFile(FILE *finput, char *str, int numberBytesFile)
 //! @return Количество строк в тексте.
 //--------------------------------------------------------------------------------
 
-int countNumberLines(char *str, int numberBytesFile)
+size_t countNumberLines( char *str, ssize_t numberBytesFile )
 {
-    assert(str != nullptr);
+    assert( str != nullptr );
 
-    int linesCount = 1;
-    int i = 0;
-    for ( ; i < numberBytesFile - 1; i++)
+    size_t linesCount     = 1;
+    size_t curOffsetInStr = 0;
+    for ( ; curOffsetInStr < numberBytesFile - 1; curOffsetInStr++ )
     {
-        if (strchr(SEPARATION_SYMBOLS, str[i]) != nullptr)
+        if ( strchr( SEPARATION_SYMBOLS, str[curOffsetInStr] ) != nullptr )
         {
             linesCount++;
-            str[i] = '\0';
+            str[curOffsetInStr] = '\0';
         }
         else
         {
-            str[i] = tolower(str[i]);
+            unsigned int codeSym = str[curOffsetInStr];
+            if ( codeSym < 97 )
+                str[curOffsetInStr] = tolower( codeSym );
         }
     }
-    str[i] = '\0';
+    str[curOffsetInStr] = '\0';
 
     return linesCount;
 }
@@ -107,15 +113,15 @@ int countNumberLines(char *str, int numberBytesFile)
 //! @note В массив структур lines происходит построчная запись текста.
 //--------------------------------------------------------------------------------
 
-void splitToLines(Line *lines, int linesCount, char *str)
+void splitToLines( Line *lines, int linesCount, char *str )
 {
-    assert(lines != nullptr);
-    assert(linesCount > 0);
-    assert(str != nullptr);
+    assert( lines != nullptr );
+    assert( linesCount > 0 );
+    assert( str != nullptr );
 
     char *ptrStr = str;
 
-    for (int i = 0; i < linesCount; i++)
+    for ( size_t i = 0; i < linesCount; i++ )
     {
         lines[i].str = ptrStr;
         __asm__ ( "next:\n\t"
@@ -140,9 +146,9 @@ void splitToLines(Line *lines, int linesCount, char *str)
 //!             на новую строку.
 //--------------------------------------------------------------------------------
 
-static void moveToNextLine(FILE *foutput)
+static void moveToNextLine( FILE *foutput )
 {
-    assert(foutput != nullptr);
+    assert( foutput != nullptr );
 
     fputs("\n", foutput);
 }
@@ -158,43 +164,43 @@ static void moveToNextLine(FILE *foutput)
 //! @return Указатель на заполненный массив структур Line.
 //--------------------------------------------------------------------------------
 
-void *fillStructLine(const char* nameFile, int *linesCount, char **ptrStr, Line **ptrLines)
+void *fillStructLine( const char* nameFile, size_t *linesCount, char **ptrStr, Line **ptrLines )
 {
-    assert(nameFile != nullptr);
-    assert(linesCount != nullptr);
-    assert(ptrStr != nullptr);
-    assert(ptrLines != nullptr);
+    assert( nameFile   != nullptr );
+    assert( linesCount != nullptr );
+    assert( ptrStr     != nullptr );
+    assert( ptrLines   != nullptr );
 
-    FILE *finput = fopen(nameFile, "r");
-    assert(finput != nullptr);
+    FILE *finput = fopen( nameFile, "r" );
+    assert( finput != nullptr );
 
-    int numberBytesFile = getFileSize(finput);
+    ssize_t numberBytesFile = getFileSize( finput );
     if (numberBytesFile == -1)
     {
-        printf("Error getFileSize\n");
-        return 0;
+        fprintf( stderr, "Error getFileSize!\n" );
+        return nullptr;
     }
 
-    char *str = (char*)calloc(numberBytesFile + 1, sizeof(char));
-    assert(str != nullptr);
+    char *str = (char*)calloc( numberBytesFile + 1, sizeof(char) );
+    assert( str != nullptr );
 
-    str  = (char *)readFile(finput, str, numberBytesFile);
-    if (str == nullptr)
+    str  = (char *)readFile( finput, str, numberBytesFile );
+    if ( str == nullptr )
     {
-        printf("Error readFile\n");
+        fprintf( stderr, "Error readFile!\n" );
         return 0;
     }
 
-    *linesCount = countNumberLines(str, numberBytesFile);
+    *linesCount = countNumberLines( str, numberBytesFile );
 
-    Line *lines = (Line*)calloc(*linesCount, sizeof(Line));
-    assert(lines != nullptr);
+    Line *lines = (Line*)calloc( *linesCount, sizeof(Line) );
+    assert( lines != nullptr );
 
-    splitToLines(lines, *linesCount, str);
+    splitToLines( lines, *linesCount, str );
 
     *ptrStr   = str;
     *ptrLines = lines;
-    fclose(finput);
+    fclose( finput );
 
     return lines;
 }
@@ -208,19 +214,19 @@ void *fillStructLine(const char* nameFile, int *linesCount, char **ptrStr, Line 
 //! @param [in] nameSort название сортировки для текста.
 //--------------------------------------------------------------------------------
 
-void writeFile(Line *lines, int linesCount, FILE *foutput)
+void writeFile( Line *lines, int linesCount, FILE *foutput )
 {
-    assert(lines != nullptr);
-    assert(linesCount > 0);
-    assert(foutput != nullptr);
+    assert( lines   != nullptr );
+    assert( linesCount > 0);
+    assert( foutput != nullptr );
 
 
-    for (int i = 0; i < linesCount; i++)
+    for ( size_t i = 0; i < linesCount; i++ )
     {
-        if (strcmp(lines[i].str, "\0") != 0)
+        if ( strcmp( lines[i].str, "\0" ) != 0 )
         {
-            fputs(lines[i].str, foutput);
-            moveToNextLine(foutput);
+            fputs( lines[i].str, foutput );
+            moveToNextLine( foutput );
         }
     }
 } 
