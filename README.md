@@ -65,11 +65,11 @@ for(size_t i = 0; i < size; i++)
 ### Ещё одно ускорение хеш-функции
 В программе по аналогии с `strlen` несколько раз вызывается функция `HashRot13`, что замедляет программу, поэтому нужно изменить код так, чтобы оставить только один вызов. А также данная функция часто вызывается из `HashTableFind`, поэтому имет смысл переписать её на ассемблере более оптимизировано.  
 Время выполнения программы в условных единицах - 36 559 187.
-![](https://github.com/vihlancevk/hash-table/blob/main/(6)asm_fun1_optimization.png)
+![](https://github.com/vihlancevk/hash-table/blob/main/optimizations/(6)asm_fun1_optimization.png)
 ### Ускорение функции `countNumberLines`
 В этой функции вызывается `tolower` для всех подряд символов, что замедляет программу, поэтому это нужно исправить.  
 Время выполнения программы в условных единицах - 33 980 330.
-![](https://github.com/vihlancevk/hash-table/blob/main/(7)tolower_optimization.png)
+![](https://github.com/vihlancevk/hash-table/blob/main/optimizations/(7)tolower_optimization.png)
 #### Итог
 Общее ускорение составило примерно `37%`.
 # Сборка программы
