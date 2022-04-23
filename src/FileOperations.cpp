@@ -94,7 +94,7 @@ size_t countNumberLines( char *str, ssize_t numberBytesFile )
         else
         {
             unsigned int codeSym = str[curOffsetInStr];
-            if ( codeSym < 97 )
+            if ( codeSym < 'a' )
                 str[curOffsetInStr] = tolower( codeSym );
         }
     }

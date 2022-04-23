@@ -4,7 +4,7 @@
 
 unsigned int HashOne( const void *elem, size_t size )
 {
-    assert(elem != nullptr);
+    assert( elem != nullptr );
 
     unsigned int hash = 1;
 
@@ -13,7 +13,7 @@ unsigned int HashOne( const void *elem, size_t size )
 
 unsigned int HashFirstSymbol( const void *elem, size_t size )
 {
-    assert(elem != nullptr);
+    assert( elem != nullptr );
 
     unsigned int hash = 0;
     char *buffer      = (char*)elem;
@@ -25,7 +25,7 @@ unsigned int HashFirstSymbol( const void *elem, size_t size )
 
 unsigned int HashWordLen( const void *elem, size_t size )
 {
-    assert(elem != nullptr);
+    assert( elem != nullptr );
 
     unsigned int hash = (unsigned int)size;
 
@@ -34,7 +34,7 @@ unsigned int HashWordLen( const void *elem, size_t size )
 
 unsigned int HashSumSymbol( const void *elem, size_t size )
 {
-    assert(elem != nullptr);
+    assert( elem != nullptr );
 
     unsigned int hash = 0;
     char *buffer      = (char*)elem;
@@ -49,7 +49,7 @@ unsigned int HashSumSymbol( const void *elem, size_t size )
 
 unsigned int HashDed( const void *elem, size_t size )
 {
-    assert(elem != nullptr);
+    assert( elem != nullptr );
 
     char *buffer      = (char*)elem;
     unsigned int hash = buffer[0];
