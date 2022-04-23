@@ -88,12 +88,12 @@ unsigned int HashRot13( const void *elem, size_t size )
 {
     assert( elem != nullptr );
     
-    int hash     = 0;
-    char *buffer = (char*)elem;
+    unsigned int hash = 0;
+    char *buffer      = (char*)elem;
     
     for(size_t i = 0; i < size; i++)
     {
-        hash += (int)buffer[i];
+        hash += (unsigned int)buffer[i];
         hash -= (hash << 13) | (hash >> 19);
     }
     
@@ -109,12 +109,12 @@ unsigned int HashRot13( const void *elem, size_t size )
 Также мы будем проверять эффективность оптимизации с ключом компиляции -O2.
 ### Версия без оптимизаций
 На примере функции `countNumberLines` на изображении ниже показано, как выглядит профайлер: левую часть занимает список функций, которые мы отсортировали по параметру `Self`, в правой верхней части мы можем видеть функции, которые вызывают выбранную нами, а в правой нижней - функции, которые вызываются из нашей.
-![](https://github.com/vihlancevk/hash-table/blob/main/optimizations1/(1)no_optimizations.png)
+![](https://github.com/vihlancevk/hash-table/blob/main/optimizations/(1)no_optimizations.png)
 На основе этого мы будем выбирать программы для оптимизации.  
 ( Время выполнения программы в условных единицах - 25 689 218 )
 ### Ускорение функции strchr
 Первая функция, которую нужно ускорить согласно нашему методу поиска объектов для оптимизации, - `strchr`.
-![](https://github.com/vihlancevk/hash-table/blob/main/optimizations1/(2)1strchr_optimization.png)
+![](https://github.com/vihlancevk/hash-table/blob/main/optimizations/(2)1strchr_optimization.png)
 Было
 ```c
 strchr( const char *str, char elem );
@@ -135,16 +135,16 @@ static int myStrchr( char elem )
     return _mm256_movemask_epi8( cmp );
 }
 ```
-![](https://github.com/vihlancevk/hash-table/blob/main/optimizations1/(2)strchr_optimization.png)
+![](https://github.com/vihlancevk/hash-table/blob/main/optimizations/(2)strchr_optimization.png)
 Функция `myStrchr` так ускорилась, что профилировщик перестал отображать её, как вызываемую в `countNumberLines`.  
 ( Время выполнения программы в условных единицах - 18 437 492 )
 ### Ускорение функции strcmp
 После первой оптимизации больше всего для оптимизации подходит  функция `strcmp`.
-![](https://github.com/vihlancevk/hash-table/blob/main/optimizations1/(3)1strcmp_optimization.png)
+![](https://github.com/vihlancevk/hash-table/blob/main/optimizations/(3)1strcmp_optimization.png)
 В программе используется метод цепочек для разрешения коллизий, поэтому при большом среднем размере списка часто внутри функции `HashTableInsert` вызывается `strcmp`, чтобы избежать этого, необходимо подобрать нужный размер хеш-таблицы, что приведёт к уменьшению средней длины списка.  
 Старая средняя длина списка - 5.2 .  
 Новая средняя длина списка  - 1.3 .  
-![](https://github.com/vihlancevk/hash-table/blob/main/optimizations1/(3)strcmp_optimization.png)
+![](https://github.com/vihlancevk/hash-table/blob/main/optimizations/(3)strcmp_optimization.png)
 ( Время выполнения программы в условных единицах - 17 222 385 )
 ### Ускорение функции HashRot13
 Далее нам нужно оптимизировать функцию `HashRot13`.  
