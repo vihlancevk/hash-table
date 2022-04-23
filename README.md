@@ -180,7 +180,7 @@ void splitToLines(Line *lines, int linesCount, char *str)
 ![](https://github.com/vihlancevk/hash-table/blob/main/optimizations/(2)2asm_insert_optimization.png)
 Данная функция была оптимизирована аналогично предыдущей.  
 ![](https://github.com/vihlancevk/hash-table/blob/main/optimizations/(2)asm_insert_optimization.png)
-( Время выполнения программы в условных единицах - 44 640 845. )
+( Время выполнения программы в условных единицах - 44 640 845 )
 ### Версия с ассемблерными вставками и функций на ассемблере
 Второй тип нашей оптимизации - переписывание функции на ассемблере, его мы применим на функции `HashRot13`.  
 ![](https://github.com/vihlancevk/hash-table/blob/main/optimizations/(3)1asm_fun_optimization.png)
@@ -247,25 +247,222 @@ mov rbx, 0      ; size_t i = 0
     ret
 ```
 ![](https://github.com/vihlancevk/hash-table/blob/main/optimizations/(3)asm_fun_optimization.png)
-( Время выполнения программы в условных единицах - 44 167 322. )
+( Время выполнения программы в условных единицах - 44 167 322 )
 ### Версия с измененной логикой программы
 В хеш-таблице 4 раза вычислялась длина каждого слова, 3 раза с помощью функции `strlen` и один раз, косвенно, в ассемблерной вставке, в функции `splitToLines`. Поэтому, чтобы ускорить программу, необходимо оставить только косвенный пересчёт внутри ассемблерной вставки и передавать в функции структуры, которые содержат в себе указатель на константую строку и её длину.  
-Время выполнения программы в условных единицах - 40 951 673.
+![](https://github.com/vihlancevk/hash-table/blob/main/optimizations/(4)1no_strlen_optimization.png)
+`splitToLines`
+Было
+```c
+void splitToLines(Line *lines, int linesCount, char *str)
+{
+    assert(lines != nullptr);
+    assert(linesCount > 0);
+    assert(str  != nullptr);
+
+    char *ptrStr = str;
+
+    for (int i = 0; i < linesCount; i++)
+    {
+        lines[i].str = ptrStr;
+        lines[i].sizeStr = (int)strlen(lines[i].str);
+        __asm__ ( "next:\n\t"
+                  "cmpb $0x0, (%%rsi)\n\t"
+                  "je stop\n\t"
+                  "incq %%rsi\n\t"
+                  "jmp next\n\t"
+                  "stop:\n\t"
+                  "incq %%rsi\n\t"
+                  :"=S"( ptrStr )
+                  :"0" ( ptrStr )
+                  :"%rax"
+                );
+    }
+}
+```
+Стало
+```c
+void splitToLines( Line *lines, int linesCount, char *str )
+{
+    assert( lines != nullptr );
+    assert( linesCount > 0 );
+    assert( str != nullptr );
+
+    char *ptrStr = str;
+
+    for ( size_t i = 0; i < linesCount; i++ )
+    {
+        lines[i].str = ptrStr;
+        __asm__ ( "next:\n\t"
+                  "cmpb $0x0, (%%rsi)\n\t"
+                  "je stop\n\t"
+                  "incq %%rsi\n\t"
+                  "jmp next\n\t"
+                  "stop:\n\t"
+                  "incq %%rsi\n\t"
+                  :"=S"( ptrStr )
+                  :"0" ( ptrStr )
+                  :"%rax"
+                );
+        lines[i].sizeStr = (int)( ptrStr - 1 - lines[i].str );
+    }
+}
+```
 ![](https://github.com/vihlancevk/hash-table/blob/main/optimizations/(4)no_strlen_optimization.png)
+( Время выполнения программы в условных единицах - 40 951 673 )
 ### Версия в увеличенным размером хеш-таблицы
 В программе используется метод цепочек для разрешения коллизий, поэтому при большом среднем размере списка часто внутри функции `HashTableInsert` вызывается `strcmp`, чтобы избежать этого, необходимо подобрать нужный размер хеш-таблицы, что приведёт к уменьшению средней длины списка.  
+![](https://github.com/vihlancevk/hash-table/blob/main/optimizations/(5)1resize_hash_table_optimization.png)
 Старая средняя длина списка - 12.  
 Новая средняя длина списка - 5.  
-Время выполнения программы в условных единицах - 38 860 644.
 ![](https://github.com/vihlancevk/hash-table/blob/main/optimizations/(5)resize_hash_table_optimization.png)
+( Время выполнения программы в условных единицах - 38 860 644 )
 ### Ещё одно ускорение хеш-функции
-В программе по аналогии с `strlen` несколько раз вызывается функция `HashRot13`, что замедляет программу, поэтому нужно изменить код так, чтобы оставить только один вызов. А также данная функция часто вызывается из `HashTableFind`, поэтому имеет смысл переписать её на ассемблере более оптимизировано.  
-Время выполнения программы в условных единицах - 36 559 187.
+В программе по аналогии с `strlen` несколько раз вызывается функция `HashRot13`, что замедляет программу, поэтому нужно изменить код так, чтобы оставить только один вызов. А также данная функция часто вызывается, поэтому имеет смысл переписать её на ассемблере более оптимизировано.  
+![](https://github.com/vihlancevk/hash-table/blob/main/optimizations/(6)1asm_fun1_optimization.png)
+Было
+```asm
+section .text
+
+global HashRot13
+
+; rdi - const void *elem
+; rsi - size_t size
+
+HashRot13:
+
+mov eax, 0      ; int hash = 0
+mov rbx, 0      ; size_t i = 0
+
+.for:
+    xor edx, edx
+
+    cmp rbx, rsi
+    jae .return
+
+    mov dl, byte [rdi + rbx] ; int dl = (int)(char*)elem[i]
+    add eax, edx             ; hash  += dl
+    
+    mov ecx, eax        ; (hash << 13)
+    shl ecx, 13         ;
+    
+    mov edx, eax        ; (hash << 19)
+    shr edx, 19         ;
+    
+    or ecx, edx         ; (hash << 13) | (hash << 19)
+    
+    sub eax, ecx        ; hash -= (hash << 13) | (hash << 19)
+    
+    inc rbx
+    jmp .for
+
+.return:
+    xor edx, edx
+    mov ecx, 700
+    div ecx
+    
+    mov eax, edx
+    ret
+```
+Стало
+```asm
+section .text
+
+global HashRot13
+
+; rdi - const void *elem
+; rsi - size_t size
+
+HashRot13:
+        test    rsi, rsi
+        je      .return
+        
+        xor     ecx, ecx ; ecx = i    = 0
+        xor     eax, eax ; eax = hash = 0
+        
+.for:
+        movsx   edx, byte [rdi + rcx] ; hash += (int)buffer[i]
+        add     eax, edx              ;
+        
+        mov     edx, eax ; hash -= ( hash << 13 ) | ( hash >> 19 )
+        rol     edx, 13  ;
+        sub     eax, edx ;
+        
+        add     rcx, 1   ; for
+        cmp     rsi, rcx ;
+        jne     .for     ;
+        
+        mov     ecx, eax            ; hash = hash % 2000
+        imul    rcx, rcx, 274877907 ;
+        shr     rcx, 39             ;
+        imul    ecx, ecx, 2000      ;
+        sub     eax, ecx            ;
+        
+        ret
+        
+.return:
+        xor     eax, eax
+        ret
+```
 ![](https://github.com/vihlancevk/hash-table/blob/main/optimizations/(6)asm_fun1_optimization.png)
+( Время выполнения программы в условных единицах - 38 860 644 )
 ### Ускорение функции `countNumberLines`
 В этой функции вызывается `tolower` для всех подряд символов, что замедляет программу, поэтому это нужно исправить.  
-Время выполнения программы в условных единицах - 33 980 330.
+![](https://github.com/vihlancevk/hash-table/blob/main/optimizations/(7)1tolower_optimization.png)
+Было
+```c
+size_t countNumberLines( char *str, ssize_t numberBytesFile )
+{
+    assert( str != nullptr );
+
+    size_t linesCount     = 1;
+    size_t curOffsetInStr = 0;
+    for ( ; curOffsetInStr < numberBytesFile - 1; curOffsetInStr++ )
+    {
+        if ( strchr( SEPARATION_SYMBOLS, str[curOffsetInStr] ) != nullptr )
+        {
+            linesCount++;
+            str[curOffsetInStr] = '\0';
+        }
+        else
+        {
+            str[curOffsetInStr] = tolower( codeSym );
+        }
+    }
+    str[curOffsetInStr] = '\0';
+
+    return linesCount;
+}
+```
+Стало
+```c
+size_t countNumberLines( char *str, ssize_t numberBytesFile )
+{
+    assert( str != nullptr );
+
+    size_t linesCount     = 1;
+    size_t curOffsetInStr = 0;
+    for ( ; curOffsetInStr < numberBytesFile - 1; curOffsetInStr++ )
+    {
+        if ( strchr( SEPARATION_SYMBOLS, str[curOffsetInStr] ) != nullptr )
+        {
+            linesCount++;
+            str[curOffsetInStr] = '\0';
+        }
+        else
+        {
+            unsigned int codeSym = str[curOffsetInStr];
+            if ( codeSym < 'a' )
+                str[curOffsetInStr] = tolower( codeSym );
+        }
+    }
+    str[curOffsetInStr] = '\0';
+
+    return linesCount;
+}
+```
 ![](https://github.com/vihlancevk/hash-table/blob/main/optimizations/(7)tolower_optimization.png)
+( Время выполнения программы в условных единицах - 33 980 330 )
 ## Итог
 Общее ускорение составило примерно `37%`.
 # Сборка программы
