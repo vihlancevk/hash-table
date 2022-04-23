@@ -3,9 +3,10 @@
 // 2) <errno.h> - прочитать про обработку ошибок
 
 #include <ctype.h>
+#include <immintrin.h>
 #include "../include/FileOperations.h"
 
-const char *SEPARATION_SYMBOLS = " .,!?;:-'`()<>{}[]/|&*#%$~_\"\n\t";
+const char  *SEPARATION_SYMBOLS     = " .,!?;:-'`©()<>{}[]/|&*#%$~_\"\n\t";
 
 static void  moveToNextLine( FILE *foutput );
 
@@ -70,6 +71,16 @@ void *readFile( FILE *finput, char *str, ssize_t numberBytesFile )
     return str;
 }
 
+static int myStrchr( char elem )
+{
+    __m256i curSym   = _mm256_set1_epi8  ( elem );
+    __m256i symbols  = _mm256_lddqu_si256( (__m256i*)SEPARATION_SYMBOLS );
+    
+    __m256i cmp = _mm256_cmpeq_epi8( symbols, curSym );
+
+    return _mm256_movemask_epi8( cmp );
+}
+
 //================================================================================
 //! @brief Функция подсчёта количества строк в тексте.
 //!
@@ -86,22 +97,35 @@ size_t countNumberLines( char *str, ssize_t numberBytesFile )
     size_t curOffsetInStr = 0;
     for ( ; curOffsetInStr < numberBytesFile - 1; curOffsetInStr++ )
     {
-        if ( strchr( SEPARATION_SYMBOLS, str[curOffsetInStr] ) != nullptr )
+        if ( myStrchr( str[curOffsetInStr] ) )
+        // if ( strchr( SEPARATION_SYMBOLS, str[curOffsetInStr] ) )
         {
             linesCount++;
             str[curOffsetInStr] = '\0';
         }
         else
         {
-            unsigned int codeSym = str[curOffsetInStr];
-            if ( codeSym < 'a' )
-                str[curOffsetInStr] = tolower( codeSym );
+            str[curOffsetInStr] = tolower( str[curOffsetInStr] );
         }
     }
     str[curOffsetInStr] = '\0';
 
     return linesCount;
 }
+
+// static void *findNextLine( char *str )
+// {
+//     assert( str != nullptr );
+
+//     char *ptrStr = str;
+
+//     while ( *ptrStr != '\0' )
+//     {
+//         ptrStr++;
+//     }
+
+//     return ptrStr + 1;
+// }
 
 //================================================================================
 //! @brief Функция разделения текста на строки.
@@ -113,17 +137,19 @@ size_t countNumberLines( char *str, ssize_t numberBytesFile )
 //! @note В массив структур lines происходит построчная запись текста.
 //--------------------------------------------------------------------------------
 
-void splitToLines( Line *lines, int linesCount, char *str )
+void splitToLines(Line *lines, int linesCount, char *str)
 {
-    assert( lines != nullptr );
-    assert( linesCount > 0 );
-    assert( str != nullptr );
+    assert(lines != nullptr);
+    assert(linesCount > 0);
+    assert(str  != nullptr);
 
     char *ptrStr = str;
 
-    for ( size_t i = 0; i < linesCount; i++ )
+    for (int i = 0; i < linesCount; i++)
     {
         lines[i].str = ptrStr;
+        // lines[i].sizeStr = (int)strlen( lines[i].str );
+        // ptrStr           = (char*)findNextLine( ptrStr );
         __asm__ ( "next:\n\t"
                   "cmpb $0x0, (%%rsi)\n\t"
                   "je stop\n\t"

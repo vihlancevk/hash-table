@@ -61,3 +61,19 @@ unsigned int HashDed( const void *elem, size_t size )
 
     return hash % ( HASH_TABLE_SIZE );
 }
+
+// unsigned int HashRot13( const void *elem, size_t size )
+// {
+//     assert( elem != nullptr );
+    
+//     unsigned int hash     = 0;
+//     char *buffer = (char*)elem;
+    
+//     for(size_t i = 0; i < size; i++)
+//     {
+//         hash += (unsigned)buffer[i];
+//         hash -= (hash << 13) | (hash >> 19);
+//     }
+    
+//     return hash % ( HASH_TABLE_SIZE );
+// }

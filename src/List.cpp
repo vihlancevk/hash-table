@@ -85,7 +85,9 @@ ListErrorCode ListCtor(List_t *list, const size_t capacity)
         return LIST_CONSTRUCTED_ERROR;
     }
     
-    ClearListLogFile();
+    #ifdef DEBUG
+        ClearListLogFile();
+    #endif // DEBUG
 
     list->status = LIST_CONSTRUCTED;
     list->isSorted = 1;
@@ -102,12 +104,9 @@ ListErrorCode ListCtor(List_t *list, const size_t capacity)
     for (i = 1; i < list->capacity - 1; i++)
     {
         list->data[i].next = i + 1;
-    }
-
-    for (i = 1; i < list->capacity; i++)
-    {
         list->data[i].prev = LIST_PLACE_FREE;
     }
+    list->data[i].prev = LIST_PLACE_FREE;
 
     list->head = 0;
     list->tail = 0;

@@ -32,6 +32,17 @@ for i in range( len( data[0] ) ):
         values[pos_values] = data[0][i]
         pos_values = pos_values + 1
 
+middle_val  = 0
+numbers_val = index_size
+for i in range( index_size ):
+    if values[i] != 0:
+        middle_val = middle_val + values[i]/2
+        continue
+    numbers_val = numbers_val - 1
+    
+middle_val = middle_val / numbers_val
+print( middle_val )
+
 plt.title( hash_function_name )
 plt.bar( index, values, width = 1.0, bottom = 0 )
 plt.show() 

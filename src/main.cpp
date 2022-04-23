@@ -34,21 +34,21 @@ MainErrorCode CheckHashFunction( const char *hashFunctionName, unsigned int (*ha
         return MAIN_HASH_TABLE_FILL_ERROR;
     }
 
-    FILE *foutput = fopen( OUTPUT_HASH_TABLE_FILE, "w" );
-    if ( foutput == nullptr )
-        return MAIN_OUTPUT_HASH_TABLE_FILE_NOT_OPEN;
+    // FILE *foutput = fopen( OUTPUT_HASH_TABLE_FILE, "w" );
+    // if ( foutput == nullptr )
+    //     return MAIN_OUTPUT_HASH_TABLE_FILE_NOT_OPEN;
 
-    fprintf( foutput, "%s\n", hashFunctionName );
+    // fprintf( foutput, "%s\n", hashFunctionName );
 
-    size_t j = 0;
-    for ( size_t i = 0; i < HASH_TABLE_SIZE; i++ )
-    {
-        j += hashTable.lists[i].size;
-        fprintf( foutput, "%zu %zu ", i, hashTable.lists[i].size );
-    }
-    printf( "%zu\n", j );
+    // size_t j = 0;
+    // for ( size_t i = 0; i < HASH_TABLE_SIZE; i++ )
+    // {
+    //     j += hashTable.lists[i].size;
+    //     fprintf( foutput, "%zu %zu ", i, hashTable.lists[i].size );
+    // }
+    // printf( "%zu\n", j );
 
-    fclose( foutput );
+    // fclose( foutput );
 
     free( ptrStr   );
     free( ptrLines );

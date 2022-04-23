@@ -9,12 +9,10 @@ HashFunctions.o
 List.o
 FileOperations.o
 HashRot13.o
-optimizations/1callgrind.out.50808
-optimizations/2callgrind.out.52152
-optimizations/3callgrind.out.53778
-optimizations/4callgrind.out.57039
-optimizations/5callgrind.out.36192
-optimizations/6callgrind.out.40406
-optimizations/7callgrind.out.42375
+optimizations/1callgrind.out.63208
+optimizations/2callgrind.out.63343
+optimizations/3callgrind.out.63512
+optimizations/4callgrind.out.63719
+optimizations/5callgrind.out.64031
 note.txt
 hashTable
