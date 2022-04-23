@@ -131,6 +131,7 @@ static void *findNextLine(char *str)
 
     return ptrStr + 1;
 }
+
 void splitToLines(Line *lines, int linesCount, char *str)
 {
     assert(lines != nullptr);
